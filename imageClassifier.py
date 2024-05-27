@@ -1,5 +1,5 @@
 
-import torch, torchvision
+import os, torch, torchvision
 from torchvision import datasets, transforms
 import torch.nn as nn
 from pathlib import Path        # To get the name of a file
@@ -31,6 +31,7 @@ class ImageClassifier(nn.Module):
         self.__test_dir = test_dir
         self.__train_dir = train_dir
         self.__val_dir = val_dir
+        self.__classes = ['NORMAL', 'VIRUS', 'BACTERIA']
 
 
     def load_data(self):
@@ -44,6 +45,12 @@ class ImageClassifier(nn.Module):
         trainset = datasets.ImageFolder(root=self.__train_dir, transform=transform)
         valset = datasets.ImageFolder(root=self.__val_dir, transform=transform)
         testset = datasets.ImageFolder(root=self.__test_dir, transform=transform)
+
+        print(trainset)
+
+        #trainset.samples = [(path, self.__get_label(os.path.basename(path))) for path, _ in trainset.samples]
+        #valset.samples = [(path, self.__get_label(os.path.basename(path))) for path, _ in valset.samples]
+        #testset.samples = [(path, self.__get_label(os.path.basename(path))) for path, _ in testset.samples]
 
         # Create DataLoaders for each dataset
         trainloader = DataLoader(trainset, batch_size=64, shuffle=True, num_workers=2)
@@ -72,11 +79,24 @@ class ImageClassifier(nn.Module):
         
 
         return trainloader, testloader, valloader
+    
+
+    def get_class_names(self):
+        return self.__classes
+    
+
+    def __get_label(file_name):
+        if 'virus' in file_name.lower():
+            return 'VIRUS'
+        elif 'bacteria' in file_name.lower():
+            return 'BACTERIA'
+        else:
+            return 'NORMAL'
         
 
-#load_data = ImageClassifier()
+load_data = ImageClassifier()
 
-#print(1)
+print(load_data.load_data())
 
 
 

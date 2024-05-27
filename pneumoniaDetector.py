@@ -19,9 +19,7 @@ class PneumoniaDetector(nn.Module):
         )
 
 
-
-
-data_dir = '../Chest_X-Ray_Dataset'
+data_dir = './chest_xray'
 train_dir = 'train'
 test_dir = 'test'
 val_dir = 'val'

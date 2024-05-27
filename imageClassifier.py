@@ -28,8 +28,8 @@ class ImageClassifier(nn.Module):
                  test_dir = './chest_xray/test', 
                  val_dir = './chest_xray/val'):
         
-        self.__train_dir = train_dir
         self.__test_dir = test_dir
+        self.__train_dir = train_dir
         self.__val_dir = val_dir
 
 
@@ -46,9 +46,9 @@ class ImageClassifier(nn.Module):
         testset = datasets.ImageFolder(root=self.__test_dir, transform=transform)
 
         # Create DataLoaders for each dataset
-        trainloader = DataLoader(trainset, batch_size=4, shuffle=True, num_workers=2)
-        valloader = DataLoader(valset, batch_size=4, shuffle=False, num_workers=2)
-        testloader = DataLoader(testset, batch_size=4, shuffle=False, num_workers=2)
+        trainloader = DataLoader(trainset, batch_size=64, shuffle=True, num_workers=2)
+        valloader = DataLoader(valset, batch_size=64, shuffle=False, num_workers=2)
+        testloader = DataLoader(testset, batch_size=64, shuffle=False, num_workers=2)
 
         """
         trainset = torchvision.datasets.CIFAR10(root = self.__train_dir, train=True,
@@ -74,7 +74,9 @@ class ImageClassifier(nn.Module):
         return trainloader, testloader, valloader
         
 
+#load_data = ImageClassifier()
 
+#print(1)
 
 
 

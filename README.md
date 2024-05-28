@@ -8,8 +8,7 @@ The project consists on detecting pneumonia through deep learning models.
 
 chest_xray -> folder with images used to train, test and validate the implemented model
 
-
-The folder 'chest_xray' contains 3 subfolders: 
+The folder contains 3 subfolders: 
     test: contains the images used to test the model
     train: contains the images used to train the model
     val: contains the images used to validate the model

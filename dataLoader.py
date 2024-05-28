@@ -3,11 +3,10 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
 
-# Algoritmo de classificação de imagens utilizado para desenvolver o modelo
-class DataLoader():
+# Load the used dataset to develop the deep learning model
+class DataLoader:
 
     """
-    data_dir -> the data root path
     train_dir -> the directory for the images used to train the model
     test_dir -> the directory for the images used to test the model
     val_dir -> the directory for the images used to validate the model
@@ -16,17 +15,31 @@ class DataLoader():
                 - all images on PNEUMONIA folders are classified as PNEUMONIA
 
     """
-    def __init__(self, train_dir = './chest_xray/train', 
-                 test_dir = './chest_xray/test', 
-                 val_dir = './chest_xray/val'):
-        
-        self.__test_dir = test_dir
-        self.__train_dir = train_dir
-        self.__val_dir = val_dir
+    def __init__(self):
+        self.__test_dir = './chest_xray/train'
+        self.__train_dir = './chest_xray/test'
+        self.__val_dir = './chest_xray/val'
 
 
     def load_data(self):
 
+        """
+        Define the transform used for image pre-processing
+        The transform uses a sequence of transforms simultaneously applied to each image before being fed to the
+        deep learning model
+
+        transforms.Compose() -> combines several transforms into a single specific sequence. Each image will have
+                    the following transformations:
+        
+            - transforms.ToTensor() -> transforms a PIL image or numpy.ndarray (H x W x C) in the range [0, 255] to
+            a torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0]
+
+            - transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) 
+                -> normalizes each channel of the input and the image pixels values.
+                -> on this case, all three channels are normalized with mean of 0.5 and standard deviation of 0.5
+                    that rescales the pixels values to be on the range [-1, 1]
+        
+        """
         transform = transforms.Compose(
             [transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -44,6 +57,10 @@ class DataLoader():
             root/cat/123.png
             root/cat/nsdf3.png
             root/cat/[...]/asd932_.png
+
+
+        transform -> the pre-processing that will be applied to the images (transform.Compose)
+            
         """
         trainset = datasets.ImageFolder(root=self.__train_dir, transform=transform)
         valset = datasets.ImageFolder(root=self.__val_dir, transform=transform)
@@ -55,6 +72,8 @@ class DataLoader():
         in training, shuffle = True, because we want to shuffle the data in order to avoid overfitting
         and get better results
         but in testing and validation, shuffle = False, because we don't have to necessarily shuffle the data
+
+        num_workers is the number of subprocesses to use for data loading.
         
         """
         trainloader = DataLoader(trainset, batch_size=64, shuffle=True, num_workers=4)

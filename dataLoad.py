@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 
 
 # Load the used dataset to develop the deep learning model
-class DataLoader:
+class DataLoad:
 
     """
     train_dir -> the directory for the images used to train the model
@@ -31,8 +31,8 @@ class DataLoader:
         transforms.Compose() -> combines several transforms into a single specific sequence. Each image will have
                     the following transformations:
         
-            - transforms.ToTensor() -> transforms a PIL image or numpy.ndarray (H x W x C) in the range [0, 255] to
-            a torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0]
+            - transforms.ToTensor() -> transforms the image in the range [0, 255] to
+                a PyTorch tensor (torch.FloatTensor) of shape (C x H x W) in the range [0.0, 1.0]
 
             - transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) 
                 -> normalizes each channel of the input and the image pixels values.

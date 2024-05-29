@@ -1,16 +1,16 @@
 
-from dataLoader import DataLoader
+from dataLoad import DataLoad
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
 # https://www.almabetter.com/bytes/articles/image-classification-using-pytorch
 
-    # A partir de 3. Define the neural network
+    # Starting from 3. Define the neural network
 
 
 
-# desenvolver, treinar, testar e validar o modelo neste ficheiro
+# develop, train, test and validate the model
 
 
 class Net(nn.Module):

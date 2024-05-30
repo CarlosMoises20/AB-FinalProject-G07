@@ -1,5 +1,7 @@
 import multiprocessing
+import matplotlib.pyplot as plt
 from dataLoad import DataLoad
+import torch, datetime
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -16,8 +18,8 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
+        self.pool = nn.MaxPool2d(2, 2)
         self.fc1 = nn.Linear(59536, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
@@ -37,58 +39,104 @@ class Net(nn.Module):
 
 
 
-
-
-
 class Model:
     def __init__(self):
         self.__model = Net()
-        #self.__criterion = nn.CrossEntropyLoss()
-        #self.__optimizer = optim.SGD(self.__model.parameters(), lr=0.001, momentum=0.9)
+        self.__criterion = nn.CrossEntropyLoss()
         self.__data = DataLoad()
-        self.__trainloader, self.__testloader, self.__valloader = self.__data.load_data()
+        self.__trainloader, self.__testloader, _ = self.__data.load_data()
 
-    def __define_loss_momentum(self, loss=0.001, momentum=0.9):
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(self.__model.parameters(), lr=loss, momentum=momentum)
-        return criterion, optimizer
 
     # training
 
-    def train_network(self, num_epochs=100, learning_rate=0.7, momentum=0.9):
+    def get_train_loader(self):
+        return self.__trainloader
+
+    def train_network(self, num_epochs, learning_rate, momentum):
         
-        criterion, optimizer = self.__define_loss_momentum(learning_rate, momentum)
+        """
+        params = iterable of parameters to optimize or dicts defining parameter groups
+        lr = learning rate
+        momentum = momentum of the gradient update
+        
+        """
+        optimizer = optim.SGD(params=self.__model.parameters(), lr=learning_rate, momentum=momentum)
+        total_loss = []
 
         # Training loop
         for epoch in range(num_epochs):
             running_loss = 0.0
-            for i, data in enumerate(self.__trainloader, 0):
+            for _, data in enumerate(self.__trainloader, 0):
                 inputs, labels = data
-
                 optimizer.zero_grad()  # Zero the parameter gradients
 
                 outputs = self.__model(inputs)  # Forward pass
-                loss = criterion(outputs, labels)  # Compute the loss
+                loss = self.__criterion(outputs, labels)  # Compute the loss
                 loss.backward()  # Backward pass
                 optimizer.step()  # Optimize the weights
 
                 running_loss += loss.item()
-                if i % 2000 == 1999:  # Print every 2000 mini-batches
-                    print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 2000))
-                    running_loss = 0.0
+                
+                #if i % 100 == 99:  # Print every 100 mini-batches
+                #    print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, loss.item()))
+
+            epoch_loss = running_loss / len(self.__trainloader)
+            total_loss.append(epoch_loss)
+            print(f"Epoch {epoch + 1}, Loss: {epoch_loss}")
 
         print('Finished Training')
 
         # Save the trained model
+        return total_loss
+    
+    def test_network(self):
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for data in self.__testloader:
+                images, labels = data
+                outputs = self.__model(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        test_accuracy = 100 * correct / total
+        return test_accuracy
+
+    def save_model(self, path):
+        datetime_now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        torch.save(self.__model.state_dict(), path + "/model_" + datetime_now + ".pt")
 
 
+    def load_model(self, path):
+        self.__model.load_state_dict(torch.load(path))
 
+"""
+
+Auxiliar code to test this module
 if __name__ == '__main__':
     # run the model to see the results
     multiprocessing.freeze_support()
 
     model = Model()
-    model.train_network(num_epochs=100, learning_rate=0.700, momentum=0.9)
+    
+    n_epochs = 15
+    
+    total_loss = model.train_network(num_epochs=n_epochs, learning_rate=0.85, momentum=0.9)
+    
+    # Plot the loss evolution, where the x-axis is the epoch and the y-axis is the loss
+    plt.plot(range(1, n_epochs + 1), total_loss)
+    plt.xticks(range(1, n_epochs + 1))  # Set the x-axis ticks to 1, 2, 3
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.title('Training Loss Evolution')
+    plt.show()
 
+    test_accuracy = model.test_network()
+    print(f"Test Accuracy: {test_accuracy:.2f}%")
+
+    model.save_model("./models")
+    
+"""
 #print(trainloader)
 

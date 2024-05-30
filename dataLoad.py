@@ -80,7 +80,20 @@ class DataLoad:
         valloader = DataLoader(valset, batch_size=64, shuffle=False, num_workers=4)
         testloader = DataLoader(testset, batch_size=64, shuffle=False, num_workers=4)
 
-        return trainloader, valloader, testloader
+        return trainloader, testloader, valloader
     
 
+"""
+Auxiliar code to test this class through output analysis
 
+
+dataload = DataLoad()
+
+train, test, val = dataload.load_data()
+
+print("Val attributes:")
+for key, value in val.__dict__.items():
+    print(f"{key}: {value}")
+
+
+"""

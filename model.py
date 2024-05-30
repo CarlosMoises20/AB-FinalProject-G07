@@ -1,14 +1,12 @@
-
+import multiprocessing
 from dataLoad import DataLoad
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torchvision import transforms
 
 # https://www.almabetter.com/bytes/articles/image-classification-using-pytorch
 
     # Starting from 3. Define the neural network
-
 
 
 # develop, train, test and validate the model
@@ -20,7 +18,7 @@ class Net(nn.Module):
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc1 = nn.Linear(59536, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
         self.fc4 = nn.Linear(10, 2)
@@ -28,7 +26,8 @@ class Net(nn.Module):
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
+        #x = x.view(-1, 16 * 5 * 5)
+        x = x.view(x.size(0), -1)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
@@ -48,10 +47,6 @@ class Model:
         #self.__optimizer = optim.SGD(self.__model.parameters(), lr=0.001, momentum=0.9)
         self.__data = DataLoad()
         self.__trainloader, self.__testloader, self.__valloader = self.__data.load_data()
-        #self.__transform = transforms.Compose(
-        #    [transforms.ToTensor(),
-        #    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-        
 
     def __define_loss_momentum(self, loss=0.001, momentum=0.9):
         criterion = nn.CrossEntropyLoss()
@@ -88,9 +83,12 @@ class Model:
 
 
 
+if __name__ == '__main__':
+    # run the model to see the results
+    multiprocessing.freeze_support()
 
-model = Model()
-model.train_network(num_epochs=100, learning_rate=0.700, momentum=0.9)
+    model = Model()
+    model.train_network(num_epochs=100, learning_rate=0.700, momentum=0.9)
 
 #print(trainloader)
 

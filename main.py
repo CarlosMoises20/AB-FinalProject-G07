@@ -2,4 +2,4 @@ import torch
 from model import *
 
 
-# treinar, testar e validar o modelo neste ficheiro?
+# run the model to see the results

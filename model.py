@@ -26,7 +26,6 @@ class Net(nn.Module):
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
-        #x = x.view(-1, 16 * 5 * 5)
         x = x.view(x.size(0), -1)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -74,9 +73,6 @@ class Model:
                 optimizer.step()  # Optimize the weights
 
                 running_loss += loss.item()
-                
-                #if i % 100 == 99:  # Print every 100 mini-batches
-                #    print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, loss.item()))
 
             epoch_loss = running_loss / len(self.__trainloader)
             total_loss.append(epoch_loss)
@@ -129,4 +125,3 @@ if __name__ == '__main__':
     model.save_model("./models")
     
 """
-#print(trainloader)

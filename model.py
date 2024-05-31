@@ -3,17 +3,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from torchvision import models
+from tqdm.notebook import tqdm
+import seaborn as sns
+import numpy as np
 
-# https://www.almabetter.com/bytes/articles/image-classification-using-pytorch
-
-    # Starting from 3. Define the neural network
-
-
-# develop, train, test and validate the model
-
+# Develop, train, test and validate the model
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes=2):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.conv2 = nn.Conv2d(6, 16, 5)
@@ -22,7 +20,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
         self.fc4 = nn.Linear(10, 2)
-
+        
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
@@ -33,95 +31,75 @@ class Net(nn.Module):
         x = self.fc4(x)
         return x
 
-
-
-
 class Model:
     def __init__(self):
-        self.__model = Net()
+        self.__model = models.resnet18(pretrained=True)
         self.__criterion = nn.CrossEntropyLoss()
         self.__data = DataLoad()
-        self.__trainloader, self.__testloader, _ = self.__data.load_data()
+        self.__trainloader, self.__testloader, self.__valloader = self.__data.load_data()
+        self.__device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
-    # training
-
-    def get_train_loader(self):
-        return self.__trainloader
-
-    def train_network(self, num_epochs, learning_rate, momentum):
-        
-        """
-        params = iterable of parameters to optimize or dicts defining parameter groups
-        lr = learning rate
-        momentum = momentum of the gradient update
-        
-        """
-        optimizer = optim.SGD(params=self.__model.parameters(), lr=learning_rate, momentum=momentum)
+    # Training
+    def train_model(self, num_epochs, learning_rate, momentum, weight_decay=0.0005):
+        optimizer = optim.SGD(self.__model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
         total_loss = []
+        best_val_acc = 0.0
 
-        # Training loop
         for epoch in range(num_epochs):
             running_loss = 0.0
+            self.__model.train()
             for _, data in enumerate(self.__trainloader, 0):
                 inputs, labels = data
-                optimizer.zero_grad()  # Zero the parameter gradients
-
-                outputs = self.__model(inputs)  # Forward pass
-                loss = self.__criterion(outputs, labels)  # Compute the loss
-                loss.backward()  # Backward pass
-                optimizer.step()  # Optimize the weights
-
+                optimizer.zero_grad()
+                outputs = self.__model(inputs)
+                loss = self.__criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
                 running_loss += loss.item()
 
             epoch_loss = running_loss / len(self.__trainloader)
             total_loss.append(epoch_loss)
-            print(f"Epoch {epoch + 1}, Loss: {epoch_loss}")
+            
+            # Avaliação no conjunto de validação
+            val_acc = self.evaluate_model(self.__valloader)
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+
+            print(f"Epoch {epoch + 1} | Loss: {epoch_loss:.4f} | Val Accuracy: {val_acc:.2f}%")
 
         print('Finished Training')
+        return total_loss, best_val_acc
 
-        # Save the trained model
-        return total_loss
-    
-    def test_network(self):
+    def evaluate_model(self, dataloader):
+        self.__model.eval()
         correct = 0
         total = 0
+        y_pred_list = []
+        y_true_list = []
         with torch.no_grad():
-            for data in self.__testloader:
+            """
+            for x_batch, y_batch in tqdm(dataloader):
+                x_batch, y_batch = x_batch.to(self.__device), y_batch.to(self.__device)
+                y_test_pred = self.__model(x_batch)
+                _, y_pred_tag = torch.max(y_test_pred, dim = 1)
+                y_pred_list.append(y_pred_tag.cpu().numpy())
+                y_true_list.append(y_batch.cpu().numpy())
+            """
+            
+            for data in dataloader:
                 images, labels = data
                 outputs = self.__model(images)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
+                y_pred_list.extend(predicted.cpu().numpy())
+                y_true_list.extend(labels.cpu().numpy())
+            
 
-        test_accuracy = 100 * correct / total
+        accuracy = 100 * correct / total
+        return accuracy
+
+
+    def test_model(self):
+        test_accuracy = self.evaluate_model(self.__testloader)
         return test_accuracy
-
-
-"""
-
-Auxiliar code to test this module
-if __name__ == '__main__':
-    # run the model to see the results
-    multiprocessing.freeze_support()
-
-    model = Model()
-    
-    n_epochs = 15
-    
-    total_loss = model.train_network(num_epochs=n_epochs, learning_rate=0.85, momentum=0.9)
-    
-    # Plot the loss evolution, where the x-axis is the epoch and the y-axis is the loss
-    plt.plot(range(1, n_epochs + 1), total_loss)
-    plt.xticks(range(1, n_epochs + 1))  # Set the x-axis ticks to 1, 2, 3
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.title('Training Loss Evolution')
-    plt.show()
-
-    test_accuracy = model.test_network()
-    print(f"Test Accuracy: {test_accuracy:.2f}%")
-
-    model.save_model("./models")
-    
-"""

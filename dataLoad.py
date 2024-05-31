@@ -41,8 +41,9 @@ class DataLoad:
         
         """
         transform = transforms.Compose(
-            [transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+            [transforms.Resize((256, 256)),  # Redimensiona todas as imagens para 256x256
+             transforms.ToTensor(),
+             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
         )
 
         """
@@ -76,9 +77,9 @@ class DataLoad:
         num_workers is the number of subprocesses to use for data loading.
         
         """
-        trainloader = DataLoader(trainset, batch_size=64, shuffle=True, num_workers=4)
-        valloader = DataLoader(valset, batch_size=64, shuffle=False, num_workers=4)
-        testloader = DataLoader(testset, batch_size=64, shuffle=False, num_workers=4)
+        trainloader = DataLoader(trainset, batch_size=4, shuffle=True, num_workers=0)
+        valloader = DataLoader(valset, batch_size=4, shuffle=False, num_workers=0)
+        testloader = DataLoader(testset, batch_size=4, shuffle=False, num_workers=0)
 
         return trainloader, testloader, valloader
     

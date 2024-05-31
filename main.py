@@ -14,7 +14,7 @@ if __name__ == '__main__':
         
     n_epochs = 7
 
-    total_loss, best_val_acc = model.train_model(num_epochs=n_epochs, learning_rate=0.3, momentum=0.9)
+    total_loss, best_val_acc = model.train_model(num_epochs=n_epochs, learning_rate=0.7, momentum=0.9)
 
     print(f"Best Val Accuracy: {best_val_acc:.2f}%")
 

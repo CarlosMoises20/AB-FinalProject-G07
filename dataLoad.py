@@ -16,8 +16,8 @@ class DataLoad:
 
     """
     def __init__(self):
-        self.__test_dir = './chest_xray/train'
-        self.__train_dir = './chest_xray/test'
+        self.__train_dir = './chest_xray/train'
+        self.__test_dir = './chest_xray/test'
         self.__val_dir = './chest_xray/val'
 
 
@@ -77,9 +77,9 @@ class DataLoad:
         num_workers is the number of subprocesses to use for data loading.
         
         """
-        trainloader = DataLoader(trainset, batch_size=4, shuffle=True, num_workers=0)
-        valloader = DataLoader(valset, batch_size=4, shuffle=False, num_workers=0)
-        testloader = DataLoader(testset, batch_size=4, shuffle=False, num_workers=0)
+        trainloader = DataLoader(trainset, batch_size=16, shuffle=True, num_workers=3)
+        valloader = DataLoader(valset, batch_size=16, shuffle=False, num_workers=3)
+        testloader = DataLoader(testset, batch_size=16, shuffle=False, num_workers=3)
 
         return trainloader, testloader, valloader
     

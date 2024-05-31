@@ -16,8 +16,8 @@ class DataLoad:
 
     """
     def __init__(self):
-        self.__train_dir = './chest_xray/train'
-        self.__test_dir = './chest_xray/test'
+        self.__test_dir = './chest_xray/train'
+        self.__train_dir = './chest_xray/test'
         self.__val_dir = './chest_xray/val'
 
 
@@ -40,10 +40,10 @@ class DataLoad:
                     that rescales the pixels values to be on the range [-1, 1]
         
         """
-        transform = transforms.Compose([
-            transforms.Resize((256, 256)),  # Resize all images to 256x256
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        transform = transforms.Compose(
+            [transforms.Resize((256, 256)),  # Redimensiona todas as imagens para 256x256
+             transforms.ToTensor(),
+             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
         )
 
         """
@@ -77,9 +77,9 @@ class DataLoad:
         num_workers is the number of subprocesses to use for data loading.
         
         """
-        trainloader = DataLoader(trainset, batch_size=8, shuffle=True, num_workers=4)
-        valloader = DataLoader(valset, batch_size=8, shuffle=False, num_workers=4)
-        testloader = DataLoader(testset, batch_size=8, shuffle=False, num_workers=4)
+        trainloader = DataLoader(trainset, batch_size=4, shuffle=True, num_workers=0)
+        valloader = DataLoader(valset, batch_size=4, shuffle=False, num_workers=0)
+        testloader = DataLoader(testset, batch_size=4, shuffle=False, num_workers=0)
 
         return trainloader, testloader, valloader
     
